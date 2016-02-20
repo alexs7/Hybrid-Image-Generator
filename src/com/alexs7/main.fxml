@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
+   <bottom>
+      <Button mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image" BorderPane.alignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets bottom="5.0" top="5.0" />
+         </BorderPane.margin>
+      </Button>
+   </bottom>
+   <left>
+      <BorderPane fx:id="firstImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <children>
+            <Text fx:id="firstImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
+         </children>
+      </BorderPane>
+   </left>
+   <right>
+      <BorderPane fx:id="secondImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <children>
+            <Text fx:id="secondImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
+         </children>
+      </BorderPane>
+   </right>
+</BorderPane>
