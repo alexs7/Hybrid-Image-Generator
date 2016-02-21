@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
-   <bottom>
-      <Button mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image" BorderPane.alignment="CENTER">
-         <font>
-            <Font size="14.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets bottom="5.0" top="5.0" />
-         </BorderPane.margin>
-      </Button>
-   </bottom>
    <left>
       <BorderPane fx:id="firstImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
          <children>
@@ -32,4 +24,35 @@
          </children>
       </BorderPane>
    </right>
+   <bottom>
+      <VBox fx:id="controls" alignment="CENTER" prefHeight="85.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <center>
+                  <Pane prefHeight="47.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Text layoutX="82.0" layoutY="26.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter Template Size (width,height):" wrappingWidth="217.21875" />
+                        <TextField fx:id="templateWidthTextField" layoutX="321.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Width" />
+                        <TextField fx:id="templateHeightTextField" layoutX="420.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Height" />
+                     </children>
+                  </Pane>
+               </center>
+            </BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <center>
+                  <Pane prefHeight="60.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Button layoutX="175.0" layoutY="8.0" mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button layoutX="358.0" layoutY="9.0" mnemonicParsing="false" onAction="#resetApplication" text="Reset" />
+                     </children>
+                  </Pane>
+               </center>
+            </BorderPane>
+         </children>
+      </VBox>
+   </bottom>
 </BorderPane>
