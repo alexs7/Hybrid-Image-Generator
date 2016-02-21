@@ -3,7 +3,6 @@ package com.alexs7;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
@@ -12,7 +11,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -27,7 +25,6 @@ public class MainController implements Initializable {
     @FXML private Pane mainPane;
     @FXML private TextField templateWidthTextField;
     @FXML private TextField templateHeightTextField;
-    @FXML private VBox controls;
 
     private ImageChooser imageChooser;
     private Image firstImage;
@@ -56,27 +53,21 @@ public class MainController implements Initializable {
 
         if(sourceId.equals("firstImageChooser")){
             firstImage = new Image(imageFile.toURI().toString());
-            renderImage(firstImage,firstImageBorderPane, stage);
+            renderImage(firstImage,firstImageBorderPane);
         }else{
             secondImage = new Image(imageFile.toURI().toString());
-            renderImage(secondImage,secondImageBorderPane, stage);
+            renderImage(secondImage,secondImageBorderPane);
         }
-
-        reSizeWindow(firstImage,secondImage,stage);
     }
 
-    private void renderImage(Image image, BorderPane imageBorderPane, Stage stage) {
+    private void renderImage(Image image, BorderPane imageBorderPane) {
         ImageView imageView = new ImageView();
         imageView.setPreserveRatio(true);
+        imageView.setFitWidth(imageBorderPane.getWidth());
+        imageView.setFitHeight(imageBorderPane.getHeight());
+        imageView.setSmooth(true);
         imageView.setImage(image);
-        imageView.setFitWidth(image.getWidth());
-        imageView.setFitHeight(image.getHeight());
-
         imageBorderPane.setCenter(imageView);
-
-        stage.setWidth(image.getWidth() * 2);
-        stage.setHeight(image.getHeight() + controls.getHeight() * heightOffset);
-        stage.centerOnScreen();
     }
 
     public void generateHybridImage() {
@@ -104,22 +95,6 @@ public class MainController implements Initializable {
 
         //if we have passed checks
         imageProcessor.generateHybridImage(firstImage,secondImage,templateWidthInt,templateHeightInt);
-    }
-
-    private void reSizeWindow(Image firstImage, Image secondImage,Stage stage) {
-        if(firstImage!=null && secondImage!=null) {
-            if(firstImage.getWidth() > secondImage.getWidth()){
-                stage.setWidth(firstImage.getWidth() * 2);
-            }else{
-                stage.setWidth(secondImage.getWidth() * 2);
-            }
-            if(firstImage.getHeight() > secondImage.getHeight()){
-                stage.setHeight(firstImage.getHeight() + controls.getHeight() * heightOffset);
-            }else{
-                stage.setHeight(secondImage.getHeight() + controls.getHeight() * heightOffset);
-            }
-            stage.centerOnScreen();
-        }
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {
