@@ -84,10 +84,11 @@ public class MainController implements Initializable {
         }
 
         //if we have passed checks
-        imageProcessor.generateHybridImage(firstImage,
+        Image hybridImage = imageProcessor.generateHybridImage(firstImage,
                                            secondImage,
                                            Double.parseDouble(firstDeviation),
                                            Double.parseDouble(secondDeviation));
+
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {

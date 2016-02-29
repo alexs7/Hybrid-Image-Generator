@@ -13,15 +13,21 @@ import java.text.DecimalFormat;
  */
 public class ImageProcessor {
 
-    public void generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) {
-        double[][] firstImageGaussianTemplate = getGaussianTemplate(1.0);
+    public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) {
+        double[][] firstImageGaussianTemplate = getGaussianTemplate(firstDeviation);
         double[][] secondImageGaussianTemplate = getGaussianTemplate(secondDeviation);
 
+
+        return convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
     }
 
-    public Image convolveImageWithTemplate(Image image, double[][] template, int templateWidth, int templateHeight) {
+    public Image convolveImageWithTemplate(Image image, double[][] template) {
+        int templateWidth = getWidthFromTemplate(template);
+        int templateHeight = getHeightFromTemplate(template);
+
         int templateHalfWidth = (int) Math.floor(templateWidth/2);
         int templateHalfHeight = (int) Math.floor(templateHeight/2);
+
         int imageWidth = (int) image.getWidth();
         int imageHeight = (int) image.getHeight();
 
@@ -159,33 +165,39 @@ public class ImageProcessor {
                 coefficient = piProduct * eulerNumberProduct;
 
                 gaussianTemplate[y][x] = coefficient;
-                System.out.println("At x: "+indexXRelativeToCenter+" and y: "+indexYRelativeToCenter+" the coefficient is: "+coefficient);
-
             }
         }
 
-        return normalizeTemplate(gaussianTemplate, size);
+        return normalizeTemplate(gaussianTemplate);
     }
 
-    private double[][] normalizeTemplate(double[][] gaussianTemplate, int size) {
-        double[][] normalizedTemplate = new double[size][size];
+    private double[][] normalizeTemplate(double[][] gaussianTemplate) {
+        int width = getWidthFromTemplate(gaussianTemplate);
+        int height  = getHeightFromTemplate(gaussianTemplate);
+        double[][] normalizedTemplate = new double[height][width];
         double sum = 0;
 
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 sum += gaussianTemplate[y][x];
             }
         }
 
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                normalizedTemplate[y][x] =  gaussianTemplate[y][x] / sum;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                normalizedTemplate[y][x] = gaussianTemplate[y][x] / sum;
             }
         }
 
-        printTemplate(normalizedTemplate,9,9);
-
         return normalizedTemplate;
+    }
+
+    private int getHeightFromTemplate(double[][] template) {
+        return template.length;
+    }
+
+    private int getWidthFromTemplate(double[][] template) {
+        return template[0].length;
     }
 
     public double[][] getAveragingTemplate(){
