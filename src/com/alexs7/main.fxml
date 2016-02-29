@@ -11,45 +11,51 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
+<BorderPane fx:id="mainPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
    <left>
-      <BorderPane fx:id="firstImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-         <children>
-            <Text fx:id="firstImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
-         </children>
+      <BorderPane fx:id="firstImageBorderPane" prefHeight="367.0" prefWidth="335.0" BorderPane.alignment="CENTER">
+         <center>
+            <Text fx:id="firstImageChooser" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" BorderPane.alignment="CENTER" />
+         </center>
+         <BorderPane.margin>
+            <Insets left="5.0" right="5.0" />
+         </BorderPane.margin>
       </BorderPane>
    </left>
    <right>
-      <BorderPane fx:id="secondImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-         <children>
-            <Text fx:id="secondImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
-         </children>
+      <BorderPane fx:id="secondImageBorderPane" prefHeight="367.0" prefWidth="335.0" BorderPane.alignment="CENTER">
+         <center>
+            <Text fx:id="secondImageChooser" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
+         </center>
+         <BorderPane.margin>
+            <Insets left="5.0" right="5.0" />
+         </BorderPane.margin>
       </BorderPane>
    </right>
    <bottom>
-      <VBox alignment="CENTER" prefHeight="73.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" prefHeight="73.0" prefWidth="700.0" BorderPane.alignment="CENTER">
          <children>
             <BorderPane prefHeight="200.0" prefWidth="200.0">
                <center>
-                  <Pane prefHeight="30.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                  <Pane prefHeight="30.0" prefWidth="700.0" BorderPane.alignment="CENTER">
                      <children>
-                        <Text layoutX="82.0" layoutY="26.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter Template Size (width,height):" wrappingWidth="217.21875" />
-                        <TextField fx:id="templateWidthTextField" layoutX="321.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Width" />
-                        <TextField fx:id="templateHeightTextField" layoutX="420.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Height" />
+                        <Text layoutX="132.0" layoutY="26.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter Template Size (width,height):" wrappingWidth="217.21875" />
+                        <TextField fx:id="templateWidthTextField" layoutX="369.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Width" />
+                        <TextField fx:id="templateHeightTextField" layoutX="457.0" layoutY="8.0" prefHeight="27.0" prefWidth="80.0" promptText="Height" />
                      </children>
                   </Pane>
                </center>
             </BorderPane>
             <BorderPane prefHeight="200.0" prefWidth="200.0">
                <center>
-                  <Pane prefHeight="60.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                  <Pane prefHeight="60.0" prefWidth="1700.0" BorderPane.alignment="CENTER">
                      <children>
-                        <Button layoutX="175.0" layoutY="5.0" mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image">
+                        <Button layoutX="215.0" layoutY="5.0" mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Button>
-                        <Button layoutX="358.0" layoutY="5.0" mnemonicParsing="false" onAction="#resetApplication" text="Reset" />
+                        <Button layoutX="404.0" layoutY="5.0" mnemonicParsing="false" onAction="#resetApplication" text="Reset" />
                      </children>
                   </Pane>
                </center>
