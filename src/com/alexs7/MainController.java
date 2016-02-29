@@ -89,6 +89,7 @@ public class MainController implements Initializable {
                                            Double.parseDouble(firstDeviation),
                                            Double.parseDouble(secondDeviation));
 
+        renderImage(hybridImage,secondImageBorderPane);
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {

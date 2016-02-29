@@ -14,11 +14,58 @@ import java.text.DecimalFormat;
 public class ImageProcessor {
 
     public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) {
-        double[][] firstImageGaussianTemplate = getGaussianTemplate(firstDeviation);
-        double[][] secondImageGaussianTemplate = getGaussianTemplate(secondDeviation);
+        GaussianKernel gaussianKernel;
 
+        gaussianKernel = new GaussianKernel(firstDeviation,5);
+        double[][] firstImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
+        gaussianKernel = new GaussianKernel(secondDeviation,5);
+        double[][] secondImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
 
-        return convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
+        Image lowFrequencyImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
+        //Image highFrequencyImage = subtractImages(secondImage, lowFrequencyImage);
+
+        return lowFrequencyImage;
+    }
+
+    public Image subtractImages(Image image, Image lowFreqImage) {
+        int imageWidth = (int) image.getWidth();
+        int imageHeight = (int) image.getHeight();
+
+        PixelReader imagePixelReader = image.getPixelReader();
+        PixelReader lowFreqImagePixelReader = lowFreqImage.getPixelReader();
+
+        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
+
+        double redChannelValue = 0;
+        double greenChannelValue = 0;
+        double blueChannelValue = 0;
+
+        for (int ix = 0; ix < imageWidth; ix++) {
+            for (int iy = 0; iy < imageHeight; iy++) {
+                redChannelValue = (imagePixelReader.getColor(ix,iy).getRed() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getRed()* 255);
+                greenChannelValue = (imagePixelReader.getColor(ix,iy).getGreen() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getGreen()* 255);
+                blueChannelValue = (imagePixelReader.getColor(ix,iy).getBlue() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getBlue()* 255);
+
+                if(redChannelValue < 0) { redChannelValue = 0; }
+                if(greenChannelValue < 0) { greenChannelValue = 0; }
+                if(blueChannelValue < 0) { blueChannelValue = 0; }
+
+                if(redChannelValue > 255) { redChannelValue = 255; }
+                if(greenChannelValue > 255) { greenChannelValue = 255; }
+                if(blueChannelValue > 255) { blueChannelValue = 255; }
+
+                newImageValues[iy][ix] = new Pixel();
+                newImageValues[iy][ix].setRed(redChannelValue);
+                newImageValues[iy][ix].setGreen(greenChannelValue);
+                newImageValues[iy][ix].setBlue(blueChannelValue);
+
+                //System.out.println("Value at x: "+ix+" and y: "+iy+" wil be red: "+redChannelValue+" green: "+greenChannelValue+" blue: "+ blueChannelValue);
+            }
+        }
+
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return wImage;
     }
 
     public Image convolveImageWithTemplate(Image image, double[][] template) {
@@ -39,16 +86,16 @@ public class ImageProcessor {
         double greenChannelValue = 0;
         double blueChannelValue = 0;
 
-        for (int ix = templateHalfWidth; ix < (imageWidth - templateHalfWidth); ix++) {
+        for (int ix = templateHalfWidth; ix < (imageWidth - templateHalfWidth); ix++) { //x=templateHalfWidth needs to change!!!
             for (int iy = templateHalfHeight; iy < (imageHeight - templateHalfHeight); iy++) {
 
                 for (int tx = 0; tx < templateWidth; tx++) {
                     for (int ty = 0; ty < templateHeight; ty++) {
                         int xIndex = ix+tx-templateHalfWidth;
                         int yIndex = iy+ty-templateHalfHeight;
-                        redChannelValue += (pixelReader.getColor(xIndex,yIndex).getRed() * 255) * template[ty][tx];
-                        greenChannelValue += (pixelReader.getColor(xIndex,yIndex).getGreen() * 255) * template[ty][tx];
-                        blueChannelValue += (pixelReader.getColor(xIndex,yIndex).getBlue() * 255) * template[ty][tx];
+                        redChannelValue += pixelReader.getColor(xIndex,yIndex).getRed() * template[ty][tx];
+                        greenChannelValue += pixelReader.getColor(xIndex,yIndex).getGreen() * template[ty][tx];
+                        blueChannelValue += pixelReader.getColor(xIndex,yIndex).getBlue() * template[ty][tx];
                     }
                 }
 
@@ -63,12 +110,14 @@ public class ImageProcessor {
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,imageWidth,imageHeight);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues,imageWidth,imageHeight);
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
 
-    private Pixel[][] normalizeImageValues(Pixel[][] imageValues, int imageWidth, int imageHeight) {
+    private Pixel[][] normalizeImageValues(Pixel[][] imageValues) {
+        int imageWidth = getWidthFromPixelArray(imageValues);
+        int imageHeight = getHeightFromPixelArray(imageValues);
         double minRedValue = 0;
         double maxRedValue = 0;
         double minGreenValue = 0;
@@ -102,9 +151,14 @@ public class ImageProcessor {
             for (int y = 0; y < imageHeight; y++) {
                 pixel = imageValues[y][x];
                 if(pixel != null) {
-                    normalizedImageValues[y][x] = new Pixel( pixel.getRed() * 255 / newRedRange,
-                                                             pixel.getGreen() * 255 / newGreenRange,
-                                                             pixel.getBlue() * 255 / newBlueRange);
+
+                    double red = pixel.getRed();
+                    double green = pixel.getGreen();
+                    double blue = pixel.getBlue();
+
+                    normalizedImageValues[y][x] = new Pixel( red * (255 / newRedRange),
+                                                             green * (255 / newGreenRange),
+                                                             blue * (255 / newBlueRange));
                 }
             }
         }
@@ -112,7 +166,9 @@ public class ImageProcessor {
         return normalizedImageValues;
     }
 
-    private WritableImage getWritableImageFromArrayValues(Pixel[][] imageValues, int imageWidth, int imageHeight) {
+    private WritableImage getWritableImageFromArrayValues(Pixel[][] imageValues) {
+        int imageWidth = getWidthFromPixelArray(imageValues);
+        int imageHeight = getHeightFromPixelArray(imageValues);
         WritableImage wImage = new WritableImage(imageWidth,imageHeight);
         wImage = fillImage(wImage,Color.BLACK);
         PixelWriter pixelWriter = wImage.getPixelWriter();
@@ -139,36 +195,6 @@ public class ImageProcessor {
             }
         }
         return wImage;
-    }
-
-    public double[][] getGaussianTemplate(double sigma){
-        int size = (int) (8.0f * sigma + 1.0f);
-        if (size % 2 == 0) size++;
-        int templateCenterXY = (int) Math.floor(size/2);
-
-        double[][] gaussianTemplate = new double [size][size];
-        double coefficient;
-        double piProduct;
-        double eulerNumberProductExponent;
-        double eulerNumberProduct;
-
-        piProduct = Math.pow(2 * Math.PI * Math.pow(sigma,2), -1);
-
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-
-                int indexXRelativeToCenter = x - templateCenterXY;
-                int indexYRelativeToCenter = y - templateCenterXY;
-
-                eulerNumberProductExponent = (Math.pow(indexXRelativeToCenter,2) + Math.pow(indexYRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
-                eulerNumberProduct = Math.pow(Math.E, -1*eulerNumberProductExponent);
-                coefficient = piProduct * eulerNumberProduct;
-
-                gaussianTemplate[y][x] = coefficient;
-            }
-        }
-
-        return normalizeTemplate(gaussianTemplate);
     }
 
     private double[][] normalizeTemplate(double[][] gaussianTemplate) {
@@ -200,22 +226,32 @@ public class ImageProcessor {
         return template[0].length;
     }
 
-    public double[][] getAveragingTemplate(){
+    private int getHeightFromPixelArray(Pixel[][] template) {
+        return template.length;
+    }
+
+    private int getWidthFromPixelArray(Pixel[][] template) {
+        return template[0].length;
+    }
+
+    //methods below used for debugging and testing purposes
+
+    private void printTemplate(double[][] template, int width, int height){
+        DecimalFormat df = new DecimalFormat("0.000000");
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                System.out.print(df.format(template[y][x]) + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    private double[][] getAveragingTemplate(){
         return new double[][]{
                 { 0.333, 0.333, 0.333 },
                 { 0.333, 0.333, 0.333 },
                 { 0.333, 0.333, 0.333 },
         };
-    }
-
-    //used for debugging purposes
-    private void printTemplate(double[][] template, int width, int height){
-        DecimalFormat df = new DecimalFormat("0.000000");
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                System.out.print(" | " + df.format(template[y][x]));
-            }
-            System.out.println();
-        }
     }
 }
