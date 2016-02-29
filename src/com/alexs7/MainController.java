@@ -23,8 +23,8 @@ public class MainController implements Initializable {
     @FXML private BorderPane firstImageBorderPane;
     @FXML private BorderPane secondImageBorderPane;
     @FXML private Pane mainPane;
-    @FXML private TextField templateWidthTextField;
-    @FXML private TextField templateHeightTextField;
+    @FXML private TextField firstImageDeviation;
+    @FXML private TextField secondImageDeviation;
 
     private ImageChooser imageChooser;
     private Image firstImage;
@@ -70,24 +70,16 @@ public class MainController implements Initializable {
 
     public void generateHybridImage() {
 
-        String templateWidth = templateWidthTextField.getText();
-        String templateHeight = templateHeightTextField.getText();
+        String firstDeviation = firstImageDeviation.getText();
+        String secondDeviation = secondImageDeviation.getText();
 
-        if(templateHeight.equals("") || templateWidth.equals("")){
-            new AlertDialog("Input Error", "Template width and height cannot be empty.").show();
+        if(firstDeviation.equals("") || secondDeviation.equals("")){
+            new AlertDialog("Input Error", "Please enter both standard deviations!").show();
             return;
         }
 
         if(firstImage == null || secondImage == null){
             new AlertDialog("Input Error", "Enter both images to continue").show();
-            return;
-        }
-
-        int templateWidthInt = Integer.parseInt(templateWidth);
-        int templateHeightInt = Integer.parseInt(templateHeight);
-
-        if((templateWidthInt % 2 == 0) || (templateHeightInt % 2 == 0) ){
-            new AlertDialog("Input Error", "Template width and height cannot be even numbers.").show();
             return;
         }
 

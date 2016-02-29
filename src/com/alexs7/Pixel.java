@@ -1,7 +1,5 @@
 package com.alexs7;
 
-import javafx.scene.paint.Color;
-
 public class Pixel {
 
     double red;
