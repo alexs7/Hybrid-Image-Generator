@@ -30,7 +30,6 @@ public class MainController implements Initializable {
     private Image firstImage;
     private Image secondImage;
     private ImageProcessor imageProcessor;
-    private double heightOffset;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -40,7 +39,6 @@ public class MainController implements Initializable {
         firstImage = null;
         secondImage = null;
         imageProcessor = new ImageProcessor();
-        heightOffset = 1.2;
     }
 
     public void openImageChooser(MouseEvent event){
@@ -94,7 +92,14 @@ public class MainController implements Initializable {
         }
 
         //if we have passed checks
-        imageProcessor.generateHybridImage(firstImage,secondImage,templateWidthInt,templateHeightInt);
+        //imageProcessor.generateHybridImage(firstImage,secondImage,templateWidthInt,templateHeightInt);
+        ImageView foo = new ImageView();
+        Image bar = imageProcessor.convolveImageWithTemplate(firstImage,imageProcessor.getAveragingTemplate(),3,3);
+        secondImageBorderPane.setCenter(foo);
+        foo.setFitWidth(secondImageBorderPane.getWidth());
+        foo.setFitHeight(secondImageBorderPane.getHeight());
+        foo.setImage(bar);
+
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {
