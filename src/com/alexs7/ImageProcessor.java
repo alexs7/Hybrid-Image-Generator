@@ -13,10 +13,9 @@ import java.text.DecimalFormat;
  */
 public class ImageProcessor {
 
-    public void generateHybridImage(Image firstImage, Image secondImage, int templateWidthInt, int templateHeightInt) {
-        double[][] gaussianTemplate = getGaussianTemplate(templateWidthInt,templateHeightInt, 0.1);
-
-        Image image = convolveImageWithTemplate(firstImage,gaussianTemplate,templateWidthInt,templateHeightInt);
+    public void generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) {
+        double[][] firstImageGaussianTemplate = getGaussianTemplate(1.0);
+        double[][] secondImageGaussianTemplate = getGaussianTemplate(secondDeviation);
 
     }
 
@@ -136,26 +135,57 @@ public class ImageProcessor {
         return wImage;
     }
 
-    public double[][] getGaussianTemplate(int width, int height, double sigma){
-        double[][] gaussianTemplate = new double [height][width];
+    public double[][] getGaussianTemplate(double sigma){
+        int size = (int) (8.0f * sigma + 1.0f);
+        if (size % 2 == 0) size++;
+        int templateCenterXY = (int) Math.floor(size/2);
+
+        double[][] gaussianTemplate = new double [size][size];
         double coefficient;
         double piProduct;
         double eulerNumberProductExponent;
         double eulerNumberProduct;
 
         piProduct = Math.pow(2 * Math.PI * Math.pow(sigma,2), -1);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                eulerNumberProductExponent = (Math.pow(x,2) + Math.pow(y,2)) / (2 * Math.pow(sigma,2));
+
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+
+                int indexXRelativeToCenter = x - templateCenterXY;
+                int indexYRelativeToCenter = y - templateCenterXY;
+
+                eulerNumberProductExponent = (Math.pow(indexXRelativeToCenter,2) + Math.pow(indexYRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
                 eulerNumberProduct = Math.pow(Math.E, -1*eulerNumberProductExponent);
                 coefficient = piProduct * eulerNumberProduct;
 
                 gaussianTemplate[y][x] = coefficient;
-                System.out.println("At x: "+x+" and y: "+y+" the coefficient is: "+coefficient);
+                System.out.println("At x: "+indexXRelativeToCenter+" and y: "+indexYRelativeToCenter+" the coefficient is: "+coefficient);
+
             }
         }
 
-        return gaussianTemplate;
+        return normalizeTemplate(gaussianTemplate, size);
+    }
+
+    private double[][] normalizeTemplate(double[][] gaussianTemplate, int size) {
+        double[][] normalizedTemplate = new double[size][size];
+        double sum = 0;
+
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                sum += gaussianTemplate[y][x];
+            }
+        }
+
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                normalizedTemplate[y][x] =  gaussianTemplate[y][x] / sum;
+            }
+        }
+
+        printTemplate(normalizedTemplate,9,9);
+
+        return normalizedTemplate;
     }
 
     public double[][] getAveragingTemplate(){

@@ -84,14 +84,10 @@ public class MainController implements Initializable {
         }
 
         //if we have passed checks
-        //imageProcessor.generateHybridImage(firstImage,secondImage,templateWidthInt,templateHeightInt);
-        ImageView foo = new ImageView();
-        Image bar = imageProcessor.convolveImageWithTemplate(firstImage,imageProcessor.getAveragingTemplate(),3,3);
-        secondImageBorderPane.setCenter(foo);
-        foo.setFitWidth(secondImageBorderPane.getWidth());
-        foo.setFitHeight(secondImageBorderPane.getHeight());
-        foo.setImage(bar);
-
+        imageProcessor.generateHybridImage(firstImage,
+                                           secondImage,
+                                           Double.parseDouble(firstDeviation),
+                                           Double.parseDouble(secondDeviation));
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {
