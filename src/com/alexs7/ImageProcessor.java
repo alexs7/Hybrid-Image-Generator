@@ -22,21 +22,19 @@ public class ImageProcessor {
         gaussianKernel = new GaussianKernel(secondDeviation,5);
         double[][] secondImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
 
-        printTemplate(secondImageGaussianTemplate,5,5);
-
         //getting the low frequency image
         Image lowFrequencyFirstImage = convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
 
         //getting the high frequency image
         Image lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
-        Image highFrequencySecondImage = subtractImages(secondImage, lowFrequencySecondImage);
+        Image highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
 
-        Image hybridImage = add(lowFrequencyFirstImage,highFrequencySecondImage);
+        Image hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
 
         return hybridImage;
     }
 
-    private Image add(Image firstImage, Image secondImage) {
+    private Image addImages(Image firstImage, Image secondImage) {
         int imageWidth = (int) firstImage.getWidth();
         int imageHeight = (int) secondImage.getHeight();
 
@@ -56,15 +54,11 @@ public class ImageProcessor {
                 greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() + secondImagePixelReader.getColor(ix,iy).getGreen());
                 blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() + secondImagePixelReader.getColor(ix,iy).getBlue());
 
-                redChannelValue = redChannelValue * 255;
-                greenChannelValue = greenChannelValue * 255;
-                blueChannelValue = blueChannelValue * 255;
-
                 newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
         WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
@@ -90,15 +84,11 @@ public class ImageProcessor {
                 greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() - secondImagePixelReader.getColor(ix,iy).getGreen());
                 blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() - secondImagePixelReader.getColor(ix,iy).getBlue());
 
-                redChannelValue = redChannelValue * 255;
-                greenChannelValue = greenChannelValue * 255;
-                blueChannelValue = blueChannelValue * 255;
-
                 newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
         WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
@@ -134,10 +124,6 @@ public class ImageProcessor {
                     }
                 }
 
-                redChannelValue = redChannelValue * 255;
-                greenChannelValue = greenChannelValue * 255;
-                blueChannelValue = blueChannelValue * 255;
-
                 newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
 
                 redChannelValue = 0;
@@ -146,22 +132,20 @@ public class ImageProcessor {
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
         WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
 
-    private Pixel[][] normalizeImageValues(Pixel[][] imageValues) {
+    private Pixel[][] normalizeImageValues(Pixel[][] imageValues,double minNewValue,double maxNewValue) {
         int imageWidth = getWidthFromPixelArray(imageValues);
         int imageHeight = getHeightFromPixelArray(imageValues);
-        double minRedValue = 0;
-        double maxRedValue = 0;
-        double minGreenValue = 0;
-        double maxGreenValue = 0;
-        double minBlueValue = 0;
-        double maxBlueValue = 0;
-        double maxNewValue = 255;
-        double minNewValue = 0;
+        double minRedValue = Double.MAX_VALUE;
+        double maxRedValue = Double.MIN_VALUE;
+        double minGreenValue = Double.MAX_VALUE;
+        double maxGreenValue = Double.MIN_VALUE;
+        double minBlueValue = Double.MAX_VALUE;
+        double maxBlueValue = Double.MIN_VALUE;
         double normalizedRedValue;
         double normalizedGreenValue;
         double normalizedBlueValue;
