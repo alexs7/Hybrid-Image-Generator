@@ -18,21 +18,30 @@ public class ImageProcessor {
 
         gaussianKernel = new GaussianKernel(firstDeviation,5);
         double[][] firstImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
+
         gaussianKernel = new GaussianKernel(secondDeviation,5);
         double[][] secondImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
 
-        Image lowFrequencyImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
-        //Image highFrequencyImage = subtractImages(secondImage, lowFrequencyImage);
+        printTemplate(secondImageGaussianTemplate,5,5);
 
-        return lowFrequencyImage;
+        //getting the low frequency image
+        Image lowFrequencyFirstImage = convolveImageWithTemplate(secondImage,firstImageGaussianTemplate);
+
+        //getting the high frequency image
+        Image lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
+        Image highFrequencySecondImage = subtractImages(secondImage, lowFrequencySecondImage);
+
+        Image hybridImage = add(lowFrequencyFirstImage,highFrequencySecondImage);
+
+        return hybridImage;
     }
 
-    public Image subtractImages(Image image, Image lowFreqImage) {
-        int imageWidth = (int) image.getWidth();
-        int imageHeight = (int) image.getHeight();
+    private Image add(Image firstImage, Image secondImage) {
+        int imageWidth = (int) firstImage.getWidth();
+        int imageHeight = (int) secondImage.getHeight();
 
-        PixelReader imagePixelReader = image.getPixelReader();
-        PixelReader lowFreqImagePixelReader = lowFreqImage.getPixelReader();
+        PixelReader firstImagePixelReader = firstImage.getPixelReader();
+        PixelReader secondImagePixelReader = secondImage.getPixelReader();
 
         Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
 
@@ -42,24 +51,50 @@ public class ImageProcessor {
 
         for (int ix = 0; ix < imageWidth; ix++) {
             for (int iy = 0; iy < imageHeight; iy++) {
-                redChannelValue = (imagePixelReader.getColor(ix,iy).getRed() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getRed()* 255);
-                greenChannelValue = (imagePixelReader.getColor(ix,iy).getGreen() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getGreen()* 255);
-                blueChannelValue = (imagePixelReader.getColor(ix,iy).getBlue() * 255) - (lowFreqImagePixelReader.getColor(ix,iy).getBlue()* 255);
 
-                if(redChannelValue < 0) { redChannelValue = 0; }
-                if(greenChannelValue < 0) { greenChannelValue = 0; }
-                if(blueChannelValue < 0) { blueChannelValue = 0; }
+                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() + secondImagePixelReader.getColor(ix,iy).getRed());
+                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() + secondImagePixelReader.getColor(ix,iy).getGreen());
+                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() + secondImagePixelReader.getColor(ix,iy).getBlue());
 
-                if(redChannelValue > 255) { redChannelValue = 255; }
-                if(greenChannelValue > 255) { greenChannelValue = 255; }
-                if(blueChannelValue > 255) { blueChannelValue = 255; }
+                redChannelValue = redChannelValue * 255;
+                greenChannelValue = greenChannelValue * 255;
+                blueChannelValue = blueChannelValue * 255;
 
-                newImageValues[iy][ix] = new Pixel();
-                newImageValues[iy][ix].setRed(redChannelValue);
-                newImageValues[iy][ix].setGreen(greenChannelValue);
-                newImageValues[iy][ix].setBlue(blueChannelValue);
+                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
+            }
+        }
 
-                //System.out.println("Value at x: "+ix+" and y: "+iy+" wil be red: "+redChannelValue+" green: "+greenChannelValue+" blue: "+ blueChannelValue);
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues);
+        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return wImage;
+    }
+
+
+    public Image subtractImages(Image firstImage, Image secondImage) {
+        int imageWidth = (int) firstImage.getWidth();
+        int imageHeight = (int) secondImage.getHeight();
+
+        PixelReader firstImagePixelReader = firstImage.getPixelReader();
+        PixelReader secondImagePixelReader = secondImage.getPixelReader();
+
+        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
+
+        double redChannelValue = 0;
+        double greenChannelValue = 0;
+        double blueChannelValue = 0;
+
+        for (int ix = 0; ix < imageWidth; ix++) {
+            for (int iy = 0; iy < imageHeight; iy++) {
+
+                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() - secondImagePixelReader.getColor(ix,iy).getRed());
+                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() - secondImagePixelReader.getColor(ix,iy).getGreen());
+                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() - secondImagePixelReader.getColor(ix,iy).getBlue());
+
+                redChannelValue = redChannelValue * 255;
+                greenChannelValue = greenChannelValue * 255;
+                blueChannelValue = blueChannelValue * 255;
+
+                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
             }
         }
 
