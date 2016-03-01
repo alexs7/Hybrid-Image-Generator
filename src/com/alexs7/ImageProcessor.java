@@ -25,7 +25,7 @@ public class ImageProcessor {
         printTemplate(secondImageGaussianTemplate,5,5);
 
         //getting the low frequency image
-        Image lowFrequencyFirstImage = convolveImageWithTemplate(secondImage,firstImageGaussianTemplate);
+        Image lowFrequencyFirstImage = convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
 
         //getting the high frequency image
         Image lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
@@ -134,10 +134,11 @@ public class ImageProcessor {
                     }
                 }
 
-                newImageValues[iy][ix] = new Pixel();
-                newImageValues[iy][ix].setRed(redChannelValue);
-                newImageValues[iy][ix].setGreen(greenChannelValue);
-                newImageValues[iy][ix].setBlue(blueChannelValue);
+                redChannelValue = redChannelValue * 255;
+                greenChannelValue = greenChannelValue * 255;
+                blueChannelValue = blueChannelValue * 255;
+
+                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
 
                 redChannelValue = 0;
                 greenChannelValue = 0;
@@ -159,6 +160,11 @@ public class ImageProcessor {
         double maxGreenValue = 0;
         double minBlueValue = 0;
         double maxBlueValue = 0;
+        double maxNewValue = 255;
+        double minNewValue = 0;
+        double normalizedRedValue;
+        double normalizedGreenValue;
+        double normalizedBlueValue;
         Pixel[][] normalizedImageValues = new Pixel[imageHeight][imageWidth];
         Pixel pixel;
 
@@ -178,10 +184,6 @@ public class ImageProcessor {
             }
         }
 
-        double newRedRange = maxRedValue - minRedValue;
-        double newGreenRange = maxGreenValue - minGreenValue;
-        double newBlueRange = maxBlueValue - minBlueValue;
-
         for (int x = 0; x < imageWidth; x++) {
             for (int y = 0; y < imageHeight; y++) {
                 pixel = imageValues[y][x];
@@ -191,9 +193,13 @@ public class ImageProcessor {
                     double green = pixel.getGreen();
                     double blue = pixel.getBlue();
 
-                    normalizedImageValues[y][x] = new Pixel( red * (255 / newRedRange),
-                                                             green * (255 / newGreenRange),
-                                                             blue * (255 / newBlueRange));
+                    normalizedRedValue = (red - minRedValue) * ((maxNewValue - minNewValue)/(maxRedValue - minRedValue)) + minNewValue;
+                    normalizedGreenValue = (green - minGreenValue) * ((maxNewValue - minNewValue)/(maxGreenValue - minGreenValue)) + minNewValue;
+                    normalizedBlueValue = (blue - minBlueValue) * ((maxNewValue - minNewValue)/(maxBlueValue - minBlueValue)) + minNewValue;
+
+                    normalizedImageValues[y][x] = new Pixel( normalizedRedValue,
+                                                             normalizedGreenValue,
+                                                             normalizedBlueValue);
                 }
             }
         }
