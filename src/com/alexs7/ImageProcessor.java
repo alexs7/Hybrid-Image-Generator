@@ -36,7 +36,7 @@ public class ImageProcessor {
         return hybridImage;
     }
 
-    public Image convolveImageWithTemplate(Image image, double[][] template) throws InvalidKernelSize {
+    public Image convolve(Image image, double[][] template) throws InvalidKernelSize {
         int templateWidth = getWidthFromTemplate(template);
         int templateHeight = getHeightFromTemplate(template);
 
