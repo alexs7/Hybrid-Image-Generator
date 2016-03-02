@@ -30,6 +30,7 @@ public class MainController implements Initializable {
     private ImageChooser imageChooser;
     private Image firstImage;
     private Image secondImage;
+    private Image hybridImage;
     private ImageProcessor imageProcessor;
 
     @Override
@@ -83,7 +84,7 @@ public class MainController implements Initializable {
         }
 
         //if we have passed checks
-        Image hybridImage = null;
+        hybridImage = null;
         try {
             hybridImage = imageProcessor.generateHybridImage(firstImage,
                                                secondImage,
@@ -99,5 +100,21 @@ public class MainController implements Initializable {
     public void resetApplication(ActionEvent actionEvent) throws Exception {
         Stage primaryStage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
         new Main().start(primaryStage);
+    }
+
+    public void hybridImageZoomIn(ActionEvent event) {
+        if(hybridImage != null){
+            ImageView imageView = (ImageView) hybridImageBorderPane.getCenter();
+            imageView.setFitHeight(imageView.getFitHeight() + imageView.getFitHeight() * 0.1);
+            imageView.setFitWidth(imageView.getFitWidth() + imageView.getFitWidth() * 0.1);
+        }
+    }
+
+    public void hybridImageZoomOut(ActionEvent event) {
+        if(hybridImage != null){
+            ImageView imageView = (ImageView) hybridImageBorderPane.getCenter();
+            imageView.setFitHeight(imageView.getFitHeight() - imageView.getFitHeight() * 0.1);
+            imageView.setFitWidth(imageView.getFitWidth() - imageView.getFitWidth() * 0.1);
+        }
     }
 }

@@ -81,12 +81,12 @@
                            <children>
                               <BorderPane prefHeight="200.0" prefWidth="150.0">
                                  <center>
-                                    <Button mnemonicParsing="false" text="Zoom in" BorderPane.alignment="CENTER" />
+                                    <Button onAction="#hybridImageZoomIn" mnemonicParsing="false" text="Zoom in" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
                               <BorderPane prefHeight="200.0" prefWidth="150.0">
                                  <center>
-                                    <Button mnemonicParsing="false" text="Zoom out" BorderPane.alignment="CENTER" />
+                                    <Button onAction="#hybridImageZoomOut" mnemonicParsing="false" text="Zoom out" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
                            </children>

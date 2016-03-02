@@ -23,6 +23,8 @@ public class Main extends Application {
 
         stage.setTitle("Hybrid Image Generator");
         stage.setScene(new Scene(root, 1200, 600));
+        stage.setResizable(false);
+        stage.centerOnScreen();
         stage.show();
     }
 }
