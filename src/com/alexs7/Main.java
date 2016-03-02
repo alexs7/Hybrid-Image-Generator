@@ -22,7 +22,7 @@ public class Main extends Application {
         Parent root = loader.load();
 
         stage.setTitle("Hybrid Image Generator");
-        stage.setScene(new Scene(root, 700, 400));
+        stage.setScene(new Scene(root, 1200, 600));
         stage.show();
     }
 }

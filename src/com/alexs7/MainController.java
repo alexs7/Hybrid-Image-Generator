@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,9 +23,9 @@ public class MainController implements Initializable {
 
     @FXML private BorderPane firstImageBorderPane;
     @FXML private BorderPane secondImageBorderPane;
-    @FXML private Pane mainPane;
-    @FXML private TextField firstImageDeviation;
-    @FXML private TextField secondImageDeviation;
+    @FXML private BorderPane hybridImageBorderPane;
+    @FXML private TextField firstGaussianDeviation;
+    @FXML private TextField secondGuassianDeviation;
 
     private ImageChooser imageChooser;
     private Image firstImage;
@@ -33,16 +34,14 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        mainPane.setPrefWidth(600.0);
-        mainPane.setPrefHeight(400.00);
         imageChooser = new ImageChooser();
         firstImage = null;
         secondImage = null;
         imageProcessor = new ImageProcessor();
     }
 
-    public void openImageChooser(MouseEvent event){
-        Text source = (Text) event.getSource();
+    public void openImageChooser(ActionEvent event){
+        Button source = (Button) event.getSource();
         Scene scene = source.getScene();
         String sourceId = source.getId();
         Stage stage = (Stage) scene.getWindow();
@@ -70,8 +69,8 @@ public class MainController implements Initializable {
 
     public void generateHybridImage() {
 
-        String firstDeviation = firstImageDeviation.getText();
-        String secondDeviation = secondImageDeviation.getText();
+        String firstDeviation = firstGaussianDeviation.getText();
+        String secondDeviation = secondGuassianDeviation.getText();
 
         if(firstDeviation.equals("") || secondDeviation.equals("")){
             new AlertDialog("Input Error", "Please enter both standard deviations!").show();
@@ -94,7 +93,7 @@ public class MainController implements Initializable {
             new AlertDialog("Input Error", invalidKernelSize.getMessage()).show();
         }
 
-        renderImage(hybridImage,secondImageBorderPane);
+        renderImage(hybridImage,hybridImageBorderPane);
     }
 
     public void resetApplication(ActionEvent actionEvent) throws Exception {
