@@ -63,7 +63,6 @@ public class MainController implements Initializable {
         imageView.setPreserveRatio(true);
         imageView.setFitWidth(imageBorderPane.getWidth());
         imageView.setFitHeight(imageBorderPane.getHeight());
-        imageView.setSmooth(true);
         imageView.setImage(image);
         imageBorderPane.setCenter(imageView);
     }

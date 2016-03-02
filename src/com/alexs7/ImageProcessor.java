@@ -47,6 +47,8 @@ public class ImageProcessor {
         int templateHalfWidth = (int) Math.floor(templateWidth/2);
         int templateHalfHeight = (int) Math.floor(templateHeight/2);
 
+        image = padImage(image,templateHalfWidth,templateHalfHeight);
+
         int imageWidth = (int) image.getWidth();
         int imageHeight = (int) image.getHeight();
 
@@ -58,7 +60,7 @@ public class ImageProcessor {
         double greenChannelValue = 0;
         double blueChannelValue = 0;
 
-        for (int ix = templateHalfWidth; ix < (imageWidth - templateHalfWidth); ix++) { //x=templateHalfWidth needs to change!!!
+        for (int ix = templateHalfWidth; ix < (imageWidth - templateHalfWidth); ix++) {
             for (int iy = templateHalfHeight; iy < (imageHeight - templateHalfHeight); iy++) {
 
                 for (int tx = 0; tx < templateWidth; tx++) {
@@ -81,7 +83,70 @@ public class ImageProcessor {
 
         Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
         WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+
+        wImage = (WritableImage) dePadImage(wImage,templateHalfWidth,templateHalfHeight);
+
         return wImage;
+    }
+
+    private Image dePadImage(Image image, int templateHalfWidth, int templateHalfHeight){
+        Image dePaddedImage;
+        int dePaddedImageWidth = (int) image.getWidth() - (templateHalfWidth * 2);
+        int dePaddedImageHeight = (int) image.getHeight() - (templateHalfHeight * 2);
+        Pixel[][] paddedImageValues = new Pixel[dePaddedImageHeight][dePaddedImageWidth];
+
+        PixelReader pixelReader = image.getPixelReader();
+        double red;
+        double green;
+        double blue;
+
+        for (int px = 0; px < dePaddedImageWidth; px++) {
+            for (int py = 0; py < dePaddedImageHeight; py++) {
+
+                red = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getRed();
+                green = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getGreen();
+                blue = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getBlue();
+                paddedImageValues[py][px] = new Pixel(red,green,blue);
+
+            }
+        }
+
+        Pixel[][] normalizedImageValues = normalizeImageValues(paddedImageValues,0,255);
+        dePaddedImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return dePaddedImage;
+    }
+
+    private Image padImage(Image image, int templateHalfWidth, int templateHalfHeight) {
+        Image paddedImage;
+        int paddedImageWidth = (int) image.getWidth() + (templateHalfWidth * 2);
+        int paddedImageHeight = (int) image.getHeight() + (templateHalfHeight * 2);
+        Pixel[][] paddedImageValues = new Pixel[paddedImageHeight][paddedImageWidth];
+
+        PixelReader pixelReader = image.getPixelReader();
+        double red;
+        double green;
+        double blue;
+
+        for (int px = 0; px < paddedImageWidth; px++) {
+            for (int py = 0; py < paddedImageHeight; py++) {
+                paddedImageValues[py][px] = new Pixel(0,0,0);
+            }
+        }
+
+        for (int px = templateHalfWidth; px < paddedImageWidth - templateHalfWidth; px++) {
+            for (int py = templateHalfHeight; py < paddedImageHeight - templateHalfHeight; py++) {
+
+                red = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getRed();
+                green = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getGreen();
+                blue = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getBlue();
+                paddedImageValues[py][px] = new Pixel(red,green,blue);
+
+            }
+        }
+
+        Pixel[][] normalizedImageValues = normalizeImageValues(paddedImageValues,0,255);
+        paddedImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return paddedImage;
     }
 
     private Pixel[][] normalizeImageValues(Pixel[][] imageValues,double minNewValue,double maxNewValue) {
