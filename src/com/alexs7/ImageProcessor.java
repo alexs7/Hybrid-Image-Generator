@@ -13,8 +13,12 @@ import java.text.DecimalFormat;
  */
 public class ImageProcessor {
 
-    public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) {
-        GaussianKernel gaussianKernel;
+    public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) throws InvalidKernelSize {
+        GaussianKernel gaussianKernel = null;
+        Image lowFrequencyFirstImage = null;
+        Image lowFrequencySecondImage = null;
+        Image highFrequencySecondImage = null;
+        Image hybridImage = null;
 
         gaussianKernel = new GaussianKernel(firstDeviation,5);
         double[][] firstImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
@@ -22,80 +26,23 @@ public class ImageProcessor {
         gaussianKernel = new GaussianKernel(secondDeviation,5);
         double[][] secondImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
 
-        //getting the low frequency image
-        Image lowFrequencyFirstImage = convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
+        lowFrequencyFirstImage = convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
 
-        //getting the high frequency image
-        Image lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
-        Image highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
+        lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
+        highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
 
-        Image hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
+        hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
 
         return hybridImage;
     }
 
-    private Image addImages(Image firstImage, Image secondImage) {
-        int imageWidth = (int) firstImage.getWidth();
-        int imageHeight = (int) secondImage.getHeight();
-
-        PixelReader firstImagePixelReader = firstImage.getPixelReader();
-        PixelReader secondImagePixelReader = secondImage.getPixelReader();
-
-        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
-
-        double redChannelValue = 0;
-        double greenChannelValue = 0;
-        double blueChannelValue = 0;
-
-        for (int ix = 0; ix < imageWidth; ix++) {
-            for (int iy = 0; iy < imageHeight; iy++) {
-
-                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() + secondImagePixelReader.getColor(ix,iy).getRed());
-                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() + secondImagePixelReader.getColor(ix,iy).getGreen());
-                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() + secondImagePixelReader.getColor(ix,iy).getBlue());
-
-                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
-            }
-        }
-
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
-        return wImage;
-    }
-
-
-    public Image subtractImages(Image firstImage, Image secondImage) {
-        int imageWidth = (int) firstImage.getWidth();
-        int imageHeight = (int) secondImage.getHeight();
-
-        PixelReader firstImagePixelReader = firstImage.getPixelReader();
-        PixelReader secondImagePixelReader = secondImage.getPixelReader();
-
-        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
-
-        double redChannelValue = 0;
-        double greenChannelValue = 0;
-        double blueChannelValue = 0;
-
-        for (int ix = 0; ix < imageWidth; ix++) {
-            for (int iy = 0; iy < imageHeight; iy++) {
-
-                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() - secondImagePixelReader.getColor(ix,iy).getRed());
-                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() - secondImagePixelReader.getColor(ix,iy).getGreen());
-                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() - secondImagePixelReader.getColor(ix,iy).getBlue());
-
-                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
-            }
-        }
-
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
-        return wImage;
-    }
-
-    public Image convolveImageWithTemplate(Image image, double[][] template) {
+    public Image convolveImageWithTemplate(Image image, double[][] template) throws InvalidKernelSize {
         int templateWidth = getWidthFromTemplate(template);
         int templateHeight = getHeightFromTemplate(template);
+
+        if((templateWidth % 2 == 0) || (templateHeight % 2 == 0)){
+            throw new InvalidKernelSize();
+        }
 
         int templateHalfWidth = (int) Math.floor(templateWidth/2);
         int templateHalfHeight = (int) Math.floor(templateHeight/2);
@@ -241,6 +188,65 @@ public class ImageProcessor {
         }
 
         return normalizedTemplate;
+    }
+
+    private Image addImages(Image firstImage, Image secondImage) {
+        int imageWidth = (int) firstImage.getWidth();
+        int imageHeight = (int) secondImage.getHeight();
+
+        PixelReader firstImagePixelReader = firstImage.getPixelReader();
+        PixelReader secondImagePixelReader = secondImage.getPixelReader();
+
+        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
+
+        double redChannelValue = 0;
+        double greenChannelValue = 0;
+        double blueChannelValue = 0;
+
+        for (int ix = 0; ix < imageWidth; ix++) {
+            for (int iy = 0; iy < imageHeight; iy++) {
+
+                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() + secondImagePixelReader.getColor(ix,iy).getRed());
+                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() + secondImagePixelReader.getColor(ix,iy).getGreen());
+                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() + secondImagePixelReader.getColor(ix,iy).getBlue());
+
+                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
+            }
+        }
+
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
+        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return wImage;
+    }
+
+
+    public Image subtractImages(Image firstImage, Image secondImage) {
+        int imageWidth = (int) firstImage.getWidth();
+        int imageHeight = (int) secondImage.getHeight();
+
+        PixelReader firstImagePixelReader = firstImage.getPixelReader();
+        PixelReader secondImagePixelReader = secondImage.getPixelReader();
+
+        Pixel[][] newImageValues = new Pixel[imageHeight][imageWidth];
+
+        double redChannelValue = 0;
+        double greenChannelValue = 0;
+        double blueChannelValue = 0;
+
+        for (int ix = 0; ix < imageWidth; ix++) {
+            for (int iy = 0; iy < imageHeight; iy++) {
+
+                redChannelValue = (firstImagePixelReader.getColor(ix,iy).getRed() - secondImagePixelReader.getColor(ix,iy).getRed());
+                greenChannelValue = (firstImagePixelReader.getColor(ix,iy).getGreen() - secondImagePixelReader.getColor(ix,iy).getGreen());
+                blueChannelValue = (firstImagePixelReader.getColor(ix,iy).getBlue() - secondImagePixelReader.getColor(ix,iy).getBlue());
+
+                newImageValues[iy][ix] = new Pixel(redChannelValue,greenChannelValue,blueChannelValue);
+            }
+        }
+
+        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
+        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        return wImage;
     }
 
     private int getHeightFromTemplate(double[][] template) {
