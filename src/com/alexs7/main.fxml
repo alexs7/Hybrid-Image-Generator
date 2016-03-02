@@ -39,7 +39,7 @@
                <center>
                   <Pane prefHeight="30.0" prefWidth="700.0" BorderPane.alignment="CENTER">
                      <children>
-                        <Text layoutX="106.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter standard deviations for images 1 and 2" wrappingWidth="283.21875" />
+                        <Text layoutX="89.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter standard deviations for images 1 and 2" wrappingWidth="303.21875" />
                         <TextField fx:id="firstImageDeviation" layoutX="399.0" layoutY="5.0" prefHeight="27.0" prefWidth="95.0" promptText="Image 1 Dev" />
                         <TextField fx:id="secondImageDeviation" layoutX="502.0" layoutY="5.0" prefHeight="27.0" prefWidth="95.0" promptText="Image 2 Dev" />
                      </children>
