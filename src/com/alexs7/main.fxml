@@ -18,11 +18,11 @@
          <children>
             <BorderPane fx:id="firstImageBorderPane" prefHeight="450.0" prefWidth="400.0">
                <center>
-                  <Button fx:id="firstImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load First Image" BorderPane.alignment="CENTER" />
+                  <Button fx:id="firstImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load First (Low Res) Image" BorderPane.alignment="CENTER" />
                </center></BorderPane>
             <BorderPane fx:id="secondImageBorderPane" prefHeight="450.0" prefWidth="400.0">
                <center>
-                  <Button fx:id="secondImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load Second Image" BorderPane.alignment="CENTER" />
+                  <Button fx:id="secondImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load Second (High Res) Image" BorderPane.alignment="CENTER" />
                </center></BorderPane>
             <BorderPane fx:id="hybridImageBorderPane" prefHeight="450.0" prefWidth="400.0" />
          </children>
