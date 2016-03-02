@@ -5,8 +5,6 @@ package com.alexs7;
  */
 public class GaussianKernel {
 
-    double deviation;
-    int size;
     double[][] template;
 
     public GaussianKernel(double sigma) {
