@@ -7,14 +7,22 @@ public class GaussianKernel {
 
     double[][] template;
 
-    public GaussianKernel(double sigma) {
+    public GaussianKernel(double sigma, boolean normalised) {
         int size = (int) (8.0f * sigma + 1.0f);
         if (size % 2 == 0) size++;
-        this.template = calculateTemplate(size,sigma);
+        if(normalised){
+            this.template = normalizeTemplate(calculateTemplate(size,sigma));
+        }else{
+            this.template = calculateTemplate(size,sigma);
+        }
     }
 
-    public GaussianKernel(double sigma, int size) {
-        this.template = calculateTemplate(size,sigma);
+    public GaussianKernel(double sigma, int size, boolean normalised) {
+        if(normalised){
+            this.template = normalizeTemplate(calculateTemplate(size,sigma));
+        }else{
+            this.template = calculateTemplate(size,sigma);
+        }
     }
 
     private double[][] calculateTemplate(int size, double sigma) {
@@ -40,6 +48,27 @@ public class GaussianKernel {
             }
         }
         return gaussianTemplate;
+    }
+
+    private double[][] normalizeTemplate(double[][] gaussianTemplate) {
+        int width = Utilities.getWidthFromTemplate(gaussianTemplate);
+        int height  = Utilities.getHeightFromTemplate(gaussianTemplate);
+        double[][] normalizedTemplate = new double[height][width];
+        double sum = 0;
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                sum += gaussianTemplate[y][x];
+            }
+        }
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                normalizedTemplate[y][x] = gaussianTemplate[y][x] / sum;
+            }
+        }
+
+        return normalizedTemplate;
     }
 
     public double[][] getTemplate() {

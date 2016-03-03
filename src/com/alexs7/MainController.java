@@ -104,16 +104,29 @@ public class MainController implements Initializable {
     public void hybridImageZoomIn(ActionEvent event) {
         if(hybridImage != null){
             ImageView imageView = (ImageView) hybridImageBorderPane.getCenter();
-            imageView.setFitHeight(imageView.getFitHeight() + imageView.getFitHeight() * 0.1);
-            imageView.setFitWidth(imageView.getFitWidth() + imageView.getFitWidth() * 0.1);
+
+            double newHeight = imageView.getFitHeight() + imageView.getFitHeight() * 0.1;
+            double newWidth = imageView.getFitWidth() + imageView.getFitWidth() * 0.1;
+            if(!(newHeight > hybridImageBorderPane.getHeight()) || !(newWidth > hybridImageBorderPane.getWidth())) {
+                imageView.setFitHeight(newHeight);
+                imageView.setFitWidth(newWidth);
+            }else{
+                imageView.setFitHeight(hybridImageBorderPane.getHeight());
+                imageView.setFitWidth(hybridImageBorderPane.getWidth());
+            }
         }
     }
 
     public void hybridImageZoomOut(ActionEvent event) {
         if(hybridImage != null){
             ImageView imageView = (ImageView) hybridImageBorderPane.getCenter();
-            imageView.setFitHeight(imageView.getFitHeight() - imageView.getFitHeight() * 0.1);
-            imageView.setFitWidth(imageView.getFitWidth() - imageView.getFitWidth() * 0.1);
+
+            double newHeight = imageView.getFitHeight() - imageView.getFitHeight() * 0.1;
+            double newWidth = imageView.getFitWidth() - imageView.getFitWidth() * 0.1;
+            if(!(newHeight < 0) || !(newWidth < 0)) {
+                imageView.setFitHeight(newHeight);
+                imageView.setFitWidth(newWidth);
+            }
         }
     }
 }

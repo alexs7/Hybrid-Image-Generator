@@ -19,16 +19,17 @@ public class ImageProcessor {
         Image lowFrequencySecondImage = null;
         Image highFrequencySecondImage = null;
         Image hybridImage = null;
+        boolean normalised = true;
 
-        gaussianKernel = new GaussianKernel(firstDeviation,5);
-        double[][] firstImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
+        gaussianKernel = new GaussianKernel(firstDeviation,normalised);
+        double[][] firstImageGaussianTemplate = gaussianKernel.getTemplate();
 
-        gaussianKernel = new GaussianKernel(secondDeviation,5);
-        double[][] secondImageGaussianTemplate = normalizeTemplate(gaussianKernel.getTemplate());
+        gaussianKernel = new GaussianKernel(secondDeviation,normalised);
+        double[][] secondImageGaussianTemplate = gaussianKernel.getTemplate();
 
-        lowFrequencyFirstImage = convolveImageWithTemplate(firstImage,firstImageGaussianTemplate);
+        lowFrequencyFirstImage = convolve(firstImage,firstImageGaussianTemplate);
 
-        lowFrequencySecondImage = convolveImageWithTemplate(secondImage,secondImageGaussianTemplate);
+        lowFrequencySecondImage = convolve(secondImage,secondImageGaussianTemplate);
         highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
 
         hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
@@ -37,8 +38,8 @@ public class ImageProcessor {
     }
 
     public Image convolve(Image image, double[][] template) throws InvalidKernelSize {
-        int templateWidth = getWidthFromTemplate(template);
-        int templateHeight = getHeightFromTemplate(template);
+        int templateWidth = Utilities.getWidthFromTemplate(template);
+        int templateHeight = Utilities.getHeightFromTemplate(template);
 
         if((templateWidth % 2 == 0) || (templateHeight % 2 == 0)){
             throw new InvalidKernelSize();
@@ -47,7 +48,7 @@ public class ImageProcessor {
         int templateHalfWidth = (int) Math.floor(templateWidth/2);
         int templateHalfHeight = (int) Math.floor(templateHeight/2);
 
-        image = padImage(image,templateHalfWidth,templateHalfHeight);
+        image = Utilities.padImage(image,templateHalfWidth,templateHalfHeight);
 
         int imageWidth = (int) image.getWidth();
         int imageHeight = (int) image.getHeight();
@@ -81,178 +82,12 @@ public class ImageProcessor {
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        Pixel[][] normalizedImageValues = Utilities.normalizeImageValues(newImageValues,0,255);
+        WritableImage wImage = Utilities.getWritableImageFromArrayValues(normalizedImageValues);
 
-        wImage = (WritableImage) dePadImage(wImage,templateHalfWidth,templateHalfHeight);
+        wImage = (WritableImage) Utilities.dePadImage(wImage,templateHalfWidth,templateHalfHeight);
 
         return wImage;
-    }
-
-    private Image dePadImage(Image image, int templateHalfWidth, int templateHalfHeight){
-        Image dePaddedImage;
-        int dePaddedImageWidth = (int) image.getWidth() - (templateHalfWidth * 2);
-        int dePaddedImageHeight = (int) image.getHeight() - (templateHalfHeight * 2);
-        Pixel[][] paddedImageValues = new Pixel[dePaddedImageHeight][dePaddedImageWidth];
-
-        PixelReader pixelReader = image.getPixelReader();
-        double red;
-        double green;
-        double blue;
-
-        for (int px = 0; px < dePaddedImageWidth; px++) {
-            for (int py = 0; py < dePaddedImageHeight; py++) {
-
-                red = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getRed();
-                green = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getGreen();
-                blue = pixelReader.getColor(px+templateHalfWidth,py+templateHalfHeight).getBlue();
-                paddedImageValues[py][px] = new Pixel(red,green,blue);
-
-            }
-        }
-
-        Pixel[][] normalizedImageValues = normalizeImageValues(paddedImageValues,0,255);
-        dePaddedImage = getWritableImageFromArrayValues(normalizedImageValues);
-        return dePaddedImage;
-    }
-
-    private Image padImage(Image image, int templateHalfWidth, int templateHalfHeight) {
-        Image paddedImage;
-        int paddedImageWidth = (int) image.getWidth() + (templateHalfWidth * 2);
-        int paddedImageHeight = (int) image.getHeight() + (templateHalfHeight * 2);
-        Pixel[][] paddedImageValues = new Pixel[paddedImageHeight][paddedImageWidth];
-
-        PixelReader pixelReader = image.getPixelReader();
-        double red;
-        double green;
-        double blue;
-
-        for (int px = 0; px < paddedImageWidth; px++) {
-            for (int py = 0; py < paddedImageHeight; py++) {
-                paddedImageValues[py][px] = new Pixel(0,0,0);
-            }
-        }
-
-        for (int px = templateHalfWidth; px < paddedImageWidth - templateHalfWidth; px++) {
-            for (int py = templateHalfHeight; py < paddedImageHeight - templateHalfHeight; py++) {
-
-                red = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getRed();
-                green = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getGreen();
-                blue = pixelReader.getColor(px-templateHalfWidth,py-templateHalfHeight).getBlue();
-                paddedImageValues[py][px] = new Pixel(red,green,blue);
-
-            }
-        }
-
-        Pixel[][] normalizedImageValues = normalizeImageValues(paddedImageValues,0,255);
-        paddedImage = getWritableImageFromArrayValues(normalizedImageValues);
-        return paddedImage;
-    }
-
-    private Pixel[][] normalizeImageValues(Pixel[][] imageValues,double minNewValue,double maxNewValue) {
-        int imageWidth = getWidthFromPixelArray(imageValues);
-        int imageHeight = getHeightFromPixelArray(imageValues);
-        double minRedValue = Double.MAX_VALUE;
-        double maxRedValue = Double.MIN_VALUE;
-        double minGreenValue = Double.MAX_VALUE;
-        double maxGreenValue = Double.MIN_VALUE;
-        double minBlueValue = Double.MAX_VALUE;
-        double maxBlueValue = Double.MIN_VALUE;
-        double normalizedRedValue;
-        double normalizedGreenValue;
-        double normalizedBlueValue;
-        Pixel[][] normalizedImageValues = new Pixel[imageHeight][imageWidth];
-        Pixel pixel;
-
-        for (int x = 0; x < imageWidth; x++) {
-            for (int y = 0; y < imageHeight; y++) {
-                pixel = imageValues[y][x];
-                if(pixel != null) {
-                    if(pixel.getRed() < minRedValue) { minRedValue = pixel.getRed(); }
-                    if(pixel.getRed() > maxRedValue) { maxRedValue = pixel.getRed(); }
-
-                    if(pixel.getGreen() < minGreenValue) { minGreenValue = pixel.getGreen(); }
-                    if(pixel.getGreen() > maxGreenValue) { maxGreenValue = pixel.getGreen(); }
-
-                    if(pixel.getBlue() < minBlueValue) { minBlueValue = pixel.getBlue(); }
-                    if(pixel.getBlue() > maxBlueValue) { maxBlueValue = pixel.getBlue(); }
-                }
-            }
-        }
-
-        for (int x = 0; x < imageWidth; x++) {
-            for (int y = 0; y < imageHeight; y++) {
-                pixel = imageValues[y][x];
-                if(pixel != null) {
-
-                    double red = pixel.getRed();
-                    double green = pixel.getGreen();
-                    double blue = pixel.getBlue();
-
-                    normalizedRedValue = (red - minRedValue) * ((maxNewValue - minNewValue)/(maxRedValue - minRedValue)) + minNewValue;
-                    normalizedGreenValue = (green - minGreenValue) * ((maxNewValue - minNewValue)/(maxGreenValue - minGreenValue)) + minNewValue;
-                    normalizedBlueValue = (blue - minBlueValue) * ((maxNewValue - minNewValue)/(maxBlueValue - minBlueValue)) + minNewValue;
-
-                    normalizedImageValues[y][x] = new Pixel( normalizedRedValue,
-                                                             normalizedGreenValue,
-                                                             normalizedBlueValue);
-                }
-            }
-        }
-
-        return normalizedImageValues;
-    }
-
-    private WritableImage getWritableImageFromArrayValues(Pixel[][] imageValues) {
-        int imageWidth = getWidthFromPixelArray(imageValues);
-        int imageHeight = getHeightFromPixelArray(imageValues);
-        WritableImage wImage = new WritableImage(imageWidth,imageHeight);
-        wImage = fillImage(wImage,Color.BLACK);
-        PixelWriter pixelWriter = wImage.getPixelWriter();
-        Pixel pixel;
-
-        for (int x = 0; x < imageWidth; x++) {
-            for (int y = 0; y < imageHeight; y++) {
-                pixel = imageValues[y][x];
-                if(pixel != null) {
-                    pixelWriter.setColor(x, y, Color.rgb((int) pixel.getRed(),
-                                                         (int) pixel.getGreen(),
-                                                         (int) pixel.getBlue()));
-                }
-            }
-        }
-        return wImage;
-    }
-
-    public WritableImage fillImage(WritableImage wImage, Color color) {
-        PixelWriter pixelWriter = wImage.getPixelWriter();
-        for (int ix = 0; ix < wImage.getWidth(); ix++) {
-            for (int iy = 0; iy < wImage.getHeight(); iy++) {
-                pixelWriter.setColor(ix, iy, color);
-            }
-        }
-        return wImage;
-    }
-
-    private double[][] normalizeTemplate(double[][] gaussianTemplate) {
-        int width = getWidthFromTemplate(gaussianTemplate);
-        int height  = getHeightFromTemplate(gaussianTemplate);
-        double[][] normalizedTemplate = new double[height][width];
-        double sum = 0;
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                sum += gaussianTemplate[y][x];
-            }
-        }
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                normalizedTemplate[y][x] = gaussianTemplate[y][x] / sum;
-            }
-        }
-
-        return normalizedTemplate;
     }
 
     private Image addImages(Image firstImage, Image secondImage) {
@@ -279,8 +114,8 @@ public class ImageProcessor {
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        Pixel[][] normalizedImageValues = Utilities.normalizeImageValues(newImageValues,0,255);
+        WritableImage wImage = Utilities.getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
 
@@ -309,45 +144,9 @@ public class ImageProcessor {
             }
         }
 
-        Pixel[][] normalizedImageValues = normalizeImageValues(newImageValues,0,255);
-        WritableImage wImage = getWritableImageFromArrayValues(normalizedImageValues);
+        Pixel[][] normalizedImageValues = Utilities.normalizeImageValues(newImageValues,0,255);
+        WritableImage wImage = Utilities.getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
     }
 
-    private int getHeightFromTemplate(double[][] template) {
-        return template.length;
-    }
-
-    private int getWidthFromTemplate(double[][] template) {
-        return template[0].length;
-    }
-
-    private int getHeightFromPixelArray(Pixel[][] template) {
-        return template.length;
-    }
-
-    private int getWidthFromPixelArray(Pixel[][] template) {
-        return template[0].length;
-    }
-
-    //methods below used for debugging and testing purposes
-
-    private void printTemplate(double[][] template, int width, int height){
-        DecimalFormat df = new DecimalFormat("0.000000");
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                System.out.print(df.format(template[y][x]) + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    private double[][] getAveragingTemplate(){
-        return new double[][]{
-                { 0.333, 0.333, 0.333 },
-                { 0.333, 0.333, 0.333 },
-                { 0.333, 0.333, 0.333 },
-        };
-    }
 }
