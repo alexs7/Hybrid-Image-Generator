@@ -3,25 +3,29 @@ package com.alexs7;
 /**
  * Created by alex on 01/03/2016.
  */
-public class GaussianKernel {
+public class Gaussian {
 
-    double[][] template;
+    double[][] kernel;
+    double[] xComponentKernel;
+    double[] yComponentKernel;
 
-    public GaussianKernel(double sigma, boolean normalised) {
+    public Gaussian(double sigma, boolean normalised) {
         int size = (int) (8.0f * sigma + 1.0f);
         if (size % 2 == 0) size++;
         if(normalised){
-            this.template = normalizeTemplate(calculateTemplate(size,sigma));
+            this.kernel = normalizeTemplate(calculateTemplate(size,sigma));
+
+            this.xComponentKernel = calculateXComponentKernel(size,sigma);
         }else{
-            this.template = calculateTemplate(size,sigma);
+            this.kernel = calculateTemplate(size,sigma);
         }
     }
 
-    public GaussianKernel(double sigma, int size, boolean normalised) {
+    public Gaussian(double sigma, int size, boolean normalised) {
         if(normalised){
-            this.template = normalizeTemplate(calculateTemplate(size,sigma));
+            this.kernel = normalizeTemplate(calculateTemplate(size,sigma));
         }else{
-            this.template = calculateTemplate(size,sigma);
+            this.kernel = calculateTemplate(size,sigma);
         }
     }
 
@@ -50,6 +54,47 @@ public class GaussianKernel {
         return gaussianTemplate;
     }
 
+    private double[] calculateXComponentKernel(int size, double sigma) {
+        int templateCenter = (int) Math.floor(size/2);
+        double[] xComponentKernel = new double [size];
+        double coefficient;
+        double piProduct;
+        double eulerNumberProductExponent;
+        double eulerNumberProduct;
+        piProduct = Math.pow(2 * Math.PI * Math.pow(sigma,2), -1);
+        double sum = 0;
+
+        for (int x = 0; x < size; x++) {
+
+                int indexXRelativeToCenter = x - templateCenter;
+                eulerNumberProductExponent = (Math.pow(indexXRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
+                eulerNumberProduct = Math.pow(Math.E, -1*eulerNumberProductExponent);
+                coefficient = piProduct * eulerNumberProduct;
+
+                xComponentKernel[x] = coefficient;
+                sum += coefficient;
+        }
+
+        for (int x = 0; x < size; x++) {
+            xComponentKernel[x] = xComponentKernel[x] / sum;
+
+            System.out.print(" "+xComponentKernel[x]);
+
+        }
+
+        System.out.println();
+
+        double foo = 0;
+        for (int x = 0; x < size; x++) {
+            foo += xComponentKernel[x];
+
+            System.out.print("foo "+foo);
+        }
+
+
+        return xComponentKernel;
+    }
+
     private double[][] normalizeTemplate(double[][] gaussianTemplate) {
         int width = Utilities.getWidthFromTemplate(gaussianTemplate);
         int height  = Utilities.getHeightFromTemplate(gaussianTemplate);
@@ -71,7 +116,7 @@ public class GaussianKernel {
         return normalizedTemplate;
     }
 
-    public double[][] getTemplate() {
-        return template;
+    public double[][] getKernel() {
+        return kernel;
     }
 }

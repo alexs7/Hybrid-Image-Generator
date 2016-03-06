@@ -2,11 +2,7 @@ package com.alexs7;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-
-import java.text.DecimalFormat;
 
 /**
  * Created by alex on 20/02/2016.
@@ -14,18 +10,18 @@ import java.text.DecimalFormat;
 public class ImageProcessor {
 
     public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) throws InvalidKernelSize {
-        GaussianKernel gaussianKernel = null;
+        Gaussian gaussian = null;
         Image lowFrequencyFirstImage = null;
         Image lowFrequencySecondImage = null;
         Image highFrequencySecondImage = null;
         Image hybridImage = null;
         boolean normalised = true;
 
-        gaussianKernel = new GaussianKernel(firstDeviation,normalised);
-        double[][] firstImageGaussianTemplate = gaussianKernel.getTemplate();
+        gaussian = new Gaussian(firstDeviation,normalised);
+        double[][] firstImageGaussianTemplate = gaussian.getKernel();
 
-        gaussianKernel = new GaussianKernel(secondDeviation,normalised);
-        double[][] secondImageGaussianTemplate = gaussianKernel.getTemplate();
+        gaussian = new Gaussian(secondDeviation,normalised);
+        double[][] secondImageGaussianTemplate = gaussian.getKernel();
 
         lowFrequencyFirstImage = convolve(firstImage,firstImageGaussianTemplate);
 
