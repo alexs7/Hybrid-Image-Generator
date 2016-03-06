@@ -8,18 +8,23 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
+        bootstrapApp(primaryStage);
+    }
+
+    private void bootstrapApp(Stage stage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent root = loader.load();
 
-        primaryStage.setTitle("Hybrid Image Generator");
-        primaryStage.setScene(new Scene(root, 600, 400));
-        primaryStage.show();
-    }
-
-
-    public static void main(String[] args) {
-        launch(args);
+        stage.setTitle("Hybrid Image Generator");
+        stage.setScene(new Scene(root, 1200, 600));
+        stage.setResizable(false);
+        stage.centerOnScreen();
+        stage.show();
     }
 }

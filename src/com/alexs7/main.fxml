@@ -1,35 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
-   <bottom>
-      <Button mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image" BorderPane.alignment="CENTER">
-         <font>
-            <Font size="14.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets bottom="5.0" top="5.0" />
-         </BorderPane.margin>
-      </Button>
-   </bottom>
-   <left>
-      <BorderPane fx:id="firstImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alexs7.MainController">
+   <children>
+      <HBox prefHeight="450.0" prefWidth="1200.0">
          <children>
-            <Text fx:id="firstImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
+            <BorderPane fx:id="firstImageBorderPane" prefHeight="450.0" prefWidth="400.0">
+               <center>
+                  <Button fx:id="firstImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load First (Low Res) Image" BorderPane.alignment="CENTER" />
+               </center></BorderPane>
+            <BorderPane fx:id="secondImageBorderPane" prefHeight="450.0" prefWidth="400.0">
+               <center>
+                  <Button fx:id="secondImageChooser" mnemonicParsing="false" onAction="#openImageChooser" text="Load Second (High Res) Image" BorderPane.alignment="CENTER" />
+               </center></BorderPane>
+            <BorderPane fx:id="hybridImageBorderPane" prefHeight="450.0" prefWidth="400.0" />
          </children>
-      </BorderPane>
-   </left>
-   <right>
-      <BorderPane fx:id="secondImageBorderPane" prefHeight="367.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+      </HBox>
+      <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
-            <Text fx:id="secondImageChooser" layoutX="78.0" layoutY="194.0" onMouseClicked="#openImageChooser" strokeType="OUTSIDE" strokeWidth="0.0" text="Click here to add image" />
-         </children>
-      </BorderPane>
-   </right>
-</BorderPane>
+            <HBox prefHeight="100.0" prefWidth="1200.0">
+               <children>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Enter Gaussian Deviations" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <TextField fx:id="firstGaussianDeviation" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="190.0" promptText="Deviation for Image 1" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <TextField fx:id="secondGuassianDeviation" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="190.0" promptText="Deviation for Image 2" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Enter Template Size" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <TextField maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="190.0" promptText="Width" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <TextField maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="190.0" promptText="Height" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+               </children>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <BorderPane prefHeight="200.0" prefWidth="600.0">
+                     <center>
+                        <Button mnemonicParsing="false" onAction="#generateHybridImage" text="Generate Hybrid Image" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="300.0">
+                     <center>
+                        <Button mnemonicParsing="false" onAction="#resetApplication" text="Reset Application" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="300.0">
+                     <center>
+                        <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <BorderPane prefHeight="200.0" prefWidth="150.0">
+                                 <center>
+                                    <Button onAction="#hybridImageZoomIn" mnemonicParsing="false" text="Zoom in" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                              <BorderPane prefHeight="200.0" prefWidth="150.0">
+                                 <center>
+                                    <Button onAction="#hybridImageZoomOut" mnemonicParsing="false" text="Zoom out" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                           </children>
+                        </HBox>
+                     </center>
+                  </BorderPane>
+               </children>
+            </HBox>
+         </children></VBox>
+   </children>
+</VBox>
