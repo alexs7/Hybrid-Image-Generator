@@ -5,27 +5,39 @@ package com.alexs7;
  */
 public class Gaussian {
 
-    double[][] kernel;
-    double[] xComponentKernel;
-    double[] yComponentKernel;
+    double[][] kernel2D;
+    double[][] kernel1DX;
+    double[][] kernel1DY;
 
-    public Gaussian(double sigma, boolean normalised) {
+    public Gaussian(double sigma, boolean normalised, boolean seperable) {
         int size = (int) (8.0f * sigma + 1.0f);
         if (size % 2 == 0) size++;
-        if(normalised){
-            this.kernel = normalizeTemplate(calculateTemplate(size,sigma));
 
-            this.xComponentKernel = calculateXComponentKernel(size,sigma);
+        if(seperable){
+            this.kernel1DX = calculate1DComponentKernelX(size,sigma);
+            this.kernel1DY = calculate1DComponentKernelY(size,sigma);
+            return;
+        }
+
+        if(normalised){
+            this.kernel2D = normalizeTemplate(calculateTemplate(size,sigma));
         }else{
-            this.kernel = calculateTemplate(size,sigma);
+            this.kernel2D = calculateTemplate(size,sigma);
         }
     }
 
-    public Gaussian(double sigma, int size, boolean normalised) {
+    public Gaussian(double sigma, int size, boolean normalised, boolean seperable) {
+
+        if(seperable){
+            this.kernel1DX = calculate1DComponentKernelX(size,sigma);
+            this.kernel1DY = calculate1DComponentKernelY(size,sigma);
+            return;
+        }
+
         if(normalised){
-            this.kernel = normalizeTemplate(calculateTemplate(size,sigma));
+            this.kernel2D = normalizeTemplate(calculateTemplate(size,sigma));
         }else{
-            this.kernel = calculateTemplate(size,sigma);
+            this.kernel2D = calculateTemplate(size,sigma);
         }
     }
 
@@ -54,9 +66,9 @@ public class Gaussian {
         return gaussianTemplate;
     }
 
-    private double[] calculateXComponentKernel(int size, double sigma) {
+    private double[][] calculate1DComponentKernelX(int size, double sigma) {
         int templateCenter = (int) Math.floor(size/2);
-        double[] xComponentKernel = new double [size];
+        double[][] componentKernel = new double [1][size];
         double coefficient;
         double piProduct;
         double eulerNumberProductExponent;
@@ -64,35 +76,50 @@ public class Gaussian {
         piProduct = Math.pow(2 * Math.PI * Math.pow(sigma,2), -1);
         double sum = 0;
 
-        for (int x = 0; x < size; x++) {
+        for (int i = 0; i < size; i++) {
 
-                int indexXRelativeToCenter = x - templateCenter;
-                eulerNumberProductExponent = (Math.pow(indexXRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
+                int indexRelativeToCenter = i - templateCenter;
+                eulerNumberProductExponent = (Math.pow(indexRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
                 eulerNumberProduct = Math.pow(Math.E, -1*eulerNumberProductExponent);
                 coefficient = piProduct * eulerNumberProduct;
 
-                xComponentKernel[x] = coefficient;
+                componentKernel[0][i] = coefficient;
                 sum += coefficient;
         }
 
-        for (int x = 0; x < size; x++) {
-            xComponentKernel[x] = xComponentKernel[x] / sum;
-
-            System.out.print(" "+xComponentKernel[x]);
-
+        for (int i = 0; i < size; i++) {
+            componentKernel[0][i] = componentKernel[0][i] / sum;
         }
 
-        System.out.println();
+        return componentKernel;
+    }
 
-        double foo = 0;
-        for (int x = 0; x < size; x++) {
-            foo += xComponentKernel[x];
+    private double[][] calculate1DComponentKernelY(int size, double sigma) {
+        int templateCenter = (int) Math.floor(size/2);
+        double[][] componentKernel = new double [size][1];
+        double coefficient;
+        double piProduct;
+        double eulerNumberProductExponent;
+        double eulerNumberProduct;
+        piProduct = Math.pow(2 * Math.PI * Math.pow(sigma,2), -1);
+        double sum = 0;
 
-            System.out.print("foo "+foo);
+        for (int i = 0; i < size; i++) {
+
+            int indexRelativeToCenter = i - templateCenter;
+            eulerNumberProductExponent = (Math.pow(indexRelativeToCenter,2)) / (2 * Math.pow(sigma,2));
+            eulerNumberProduct = Math.pow(Math.E, -1*eulerNumberProductExponent);
+            coefficient = piProduct * eulerNumberProduct;
+
+            componentKernel[i][0] = coefficient;
+            sum += coefficient;
         }
 
+        for (int i = 0; i < size; i++) {
+            componentKernel[i][0] = componentKernel[i][0] / sum;
+        }
 
-        return xComponentKernel;
+        return componentKernel;
     }
 
     private double[][] normalizeTemplate(double[][] gaussianTemplate) {
@@ -116,7 +143,16 @@ public class Gaussian {
         return normalizedTemplate;
     }
 
-    public double[][] getKernel() {
-        return kernel;
+    public double[][] getKernel2D() {
+        return kernel2D;
     }
+
+    public double[][] getKernel1DX() {
+        return kernel1DX;
+    }
+
+    public double[][] getKernel1DY() {
+        return kernel1DY;
+    }
+
 }

@@ -16,16 +16,21 @@ public class ImageProcessor {
         Image highFrequencySecondImage = null;
         Image hybridImage = null;
         boolean normalised = true;
+        boolean userSeperableKernels = true;
+        double [][] kernel1DX;
+        double [][] kernel1DY;
 
-        gaussian = new Gaussian(firstDeviation,normalised);
-        double[][] firstImageGaussianTemplate = gaussian.getKernel();
+        gaussian = new Gaussian(firstDeviation,normalised,userSeperableKernels);
+        kernel1DX = gaussian.getKernel1DX();
+        kernel1DY = gaussian.getKernel1DY();
 
-        gaussian = new Gaussian(secondDeviation,normalised);
-        double[][] secondImageGaussianTemplate = gaussian.getKernel();
+        lowFrequencyFirstImage = convolve(convolve(firstImage,kernel1DX),kernel1DY);
 
-        lowFrequencyFirstImage = convolve(firstImage,firstImageGaussianTemplate);
+        gaussian = new Gaussian(firstDeviation,normalised,userSeperableKernels);
+        kernel1DX = gaussian.getKernel1DX();
+        kernel1DY = gaussian.getKernel1DY();
 
-        lowFrequencySecondImage = convolve(secondImage,secondImageGaussianTemplate);
+        lowFrequencySecondImage = convolve(convolve(secondImage,kernel1DX),kernel1DY);
         highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
 
         hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
