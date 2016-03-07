@@ -88,11 +88,14 @@ public class MainController implements Initializable {
             hybridImage = imageProcessor.generateHybridImage(firstImage,
                                                secondImage,
                                                Double.parseDouble(firstDeviation),
-                                               Double.parseDouble(secondDeviation));
+                                               Double.parseDouble(secondDeviation),
+                                               true);
         } catch (InvalidKernelSize invalidKernelSize) {
             new AlertDialog("Input Error", invalidKernelSize.getMessage()).show();
         }
 
+        renderImage(imageProcessor.getLowFrequenciesImage(),firstImageBorderPane);
+        renderImage(imageProcessor.getHighFrequenciesImage(),secondImageBorderPane);
         renderImage(hybridImage,hybridImageBorderPane);
     }
 

@@ -9,33 +9,40 @@ import javafx.scene.image.WritableImage;
  */
 public class ImageProcessor {
 
-    public Image generateHybridImage(Image firstImage, Image secondImage, double firstDeviation, double secondDeviation) throws InvalidKernelSize {
+    Image lowFrequenciesImage;
+    Image highFrequenciesImage;
+
+    public ImageProcessor() {
+        this.lowFrequenciesImage = null;
+        this.highFrequenciesImage = null;
+    }
+
+    //Will generate the hybrid image and set the local lowFrequenciesImage and highFrequenciesImage variables
+    public Image generateHybridImage(Image firstImage, Image secondImage,
+                                     double firstDeviation, double secondDeviation,
+                                     boolean userSeperableKernels) throws InvalidKernelSize {
         Gaussian gaussian = null;
-        Image lowFrequencyFirstImage = null;
-        Image lowFrequencySecondImage = null;
-        Image highFrequencySecondImage = null;
         Image hybridImage = null;
         boolean normalised = true;
-        boolean userSeperableKernels = true;
-        double [][] kernel1DX;
-        double [][] kernel1DY;
 
         gaussian = new Gaussian(firstDeviation,normalised,userSeperableKernels);
-        kernel1DX = gaussian.getKernel1DX();
-        kernel1DY = gaussian.getKernel1DY();
+        lowFrequenciesImage = generateLowFrequenciesImage(firstImage,gaussian, userSeperableKernels);
 
-        lowFrequencyFirstImage = convolve(convolve(firstImage,kernel1DX),kernel1DY);
+        gaussian = new Gaussian(secondDeviation,normalised,userSeperableKernels);
+        highFrequenciesImage = subtractImages(secondImage,generateLowFrequenciesImage(secondImage,gaussian,userSeperableKernels));
 
-        gaussian = new Gaussian(firstDeviation,normalised,userSeperableKernels);
-        kernel1DX = gaussian.getKernel1DX();
-        kernel1DY = gaussian.getKernel1DY();
-
-        lowFrequencySecondImage = convolve(convolve(secondImage,kernel1DX),kernel1DY);
-        highFrequencySecondImage = subtractImages(secondImage,lowFrequencySecondImage);
-
-        hybridImage = addImages(lowFrequencyFirstImage,highFrequencySecondImage);
-
+        hybridImage = addImages(lowFrequenciesImage,highFrequenciesImage);
         return hybridImage;
+    }
+
+    private Image generateLowFrequenciesImage(Image image, Gaussian gaussian, boolean userSeperableKernels) throws InvalidKernelSize {
+        if(userSeperableKernels){
+            double [][] kernel1DX = gaussian.getKernel1DX();
+            double [][] kernel1DY = gaussian.getKernel1DY();
+            return convolve(convolve(image,kernel1DX),kernel1DY);
+        }else{
+            return convolve(image,gaussian.getKernel2D());
+        }
     }
 
     public Image convolve(Image image, double[][] template) throws InvalidKernelSize {
@@ -148,6 +155,14 @@ public class ImageProcessor {
         Pixel[][] normalizedImageValues = Utilities.normalizeImageValues(newImageValues,0,255);
         WritableImage wImage = Utilities.getWritableImageFromArrayValues(normalizedImageValues);
         return wImage;
+    }
+
+    public Image getLowFrequenciesImage() {
+        return lowFrequenciesImage;
+    }
+
+    public Image getHighFrequenciesImage() {
+        return highFrequenciesImage;
     }
 
 }
